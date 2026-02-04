@@ -472,3 +472,32 @@ func DegenerateCertificate(cert []byte) ([]byte, error) {
 	}
 	return asn1.Marshal(signedContent)
 }
+
+// Copy creates a new SignedData struct based on existing PKCS7 signed data.
+func Copy(data *PKCS7, unauthenticatedAttrs ...Attribute) ([]byte, error) {
+	rawData, isSignedData := data.raw.(signedData)
+	if !isSignedData {
+		return nil, ErrUnsupportedContentType
+	}
+
+	// Make a copy of the signer infos since we change them
+	rawData.SignerInfos = append([]signerInfo{}, rawData.SignerInfos...)
+	for i := range rawData.SignerInfos {
+		err := rawData.SignerInfos[i].SetUnauthenticatedAttributes(unauthenticatedAttrs)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	inner, err := asn1.Marshal(rawData)
+	if err != nil {
+		return nil, err
+	}
+
+	outer := contentInfo{
+		ContentType: OIDSignedData,
+		Content:     asn1.RawValue{Class: 2, Tag: 0, Bytes: inner, IsCompound: true},
+	}
+
+	return asn1.Marshal(outer)
+}
