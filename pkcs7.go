@@ -121,6 +121,8 @@ func getHashForOID(oid asn1.ObjectIdentifier) (crypto.Hash, error) {
 // and returns the corresponding OID digest algorithm
 func getDigestOIDForSignatureAlgorithm(digestAlg x509.SignatureAlgorithm) (asn1.ObjectIdentifier, error) {
 	switch digestAlg {
+	case x509.MD5WithRSA:
+		return OIDDigestAlgorithmMD5, nil
 	case x509.SHA1WithRSA, x509.ECDSAWithSHA1:
 		return OIDDigestAlgorithmSHA1, nil
 	case x509.SHA256WithRSA, x509.ECDSAWithSHA256:
