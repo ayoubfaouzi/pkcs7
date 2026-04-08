@@ -59,6 +59,7 @@ var (
 	OIDAttributeSigningTime   = asn1.ObjectIdentifier{1, 2, 840, 113549, 1, 9, 5}
 
 	// Digest Algorithms
+	OIDDigestAlgorithmMD5    = asn1.ObjectIdentifier{1, 2, 840, 113549, 2, 5}
 	OIDDigestAlgorithmSHA1   = asn1.ObjectIdentifier{1, 3, 14, 3, 2, 26}
 	OIDDigestAlgorithmSHA256 = asn1.ObjectIdentifier{2, 16, 840, 1, 101, 3, 4, 2, 1}
 	OIDDigestAlgorithmSHA384 = asn1.ObjectIdentifier{2, 16, 840, 1, 101, 3, 4, 2, 2}
@@ -100,6 +101,8 @@ var (
 
 func getHashForOID(oid asn1.ObjectIdentifier) (crypto.Hash, error) {
 	switch {
+	case oid.Equal(OIDDigestAlgorithmMD5):
+		return crypto.MD5, nil
 	case oid.Equal(OIDDigestAlgorithmSHA1), oid.Equal(OIDDigestAlgorithmECDSASHA1),
 		oid.Equal(OIDDigestAlgorithmDSA), oid.Equal(OIDDigestAlgorithmDSASHA1),
 		oid.Equal(OIDEncryptionAlgorithmRSA):
@@ -118,6 +121,8 @@ func getHashForOID(oid asn1.ObjectIdentifier) (crypto.Hash, error) {
 // and returns the corresponding OID digest algorithm
 func getDigestOIDForSignatureAlgorithm(digestAlg x509.SignatureAlgorithm) (asn1.ObjectIdentifier, error) {
 	switch digestAlg {
+	case x509.MD5WithRSA:
+		return OIDDigestAlgorithmMD5, nil
 	case x509.SHA1WithRSA, x509.ECDSAWithSHA1:
 		return OIDDigestAlgorithmSHA1, nil
 	case x509.SHA256WithRSA, x509.ECDSAWithSHA256:
